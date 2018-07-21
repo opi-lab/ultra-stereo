@@ -123,16 +123,12 @@ for im1, im2 in zip(I1,I2):
       im1, org1, x1, y1 = labeled(im1,c1)
       im2, org2, x2, y2 = labeled(im2,c2)
       
-      Xorg = cv2.triangulatePoints(P1,P2,org1,org2)
-      X = (Xorg[:3]/Xorg[-1]).T.tolist()[0]
+      p1 = np.array([org1,x1,y1]).T
+      p2 = np.array([org2,x2,y2]).T
       
-      Xx = cv2.triangulatePoints(P1,P2,x1,x2)
-      X.extend((Xx[:3]/Xx[-1]).T.tolist()[0])
-      
-      Xy = cv2.triangulatePoints(P1,P2,y1,y2)
-      X.extend((Xy[:3]/Xy[-1]).T.tolist()[0])
-      
-      pts3D.append(X)
+      X = cv2.triangulatePoints(P1,P2,p1,p2)
+      X = X[:3]/X[-1]
+      pts3D.append(X.T.flatten().tolist())
       
       cv2.imshow('Detection',np.hstack([im1,im2]))
       if cv2.waitKey(1000) & 0xFF == 27:
@@ -141,5 +137,5 @@ for im1, im2 in zip(I1,I2):
 cv2.destroyAllWindows()
 pts3D = np.array(pts3D).T
 sio.savemat('pts3D.mat',{'X':pts3D})
-#axisx = np.linalg.norm(np.array(X[:3])-np.array(X[6:9]))
-#axisy = np.linalg.norm(np.array(X[:3])-np.array(X[3:6]))
+#axisx = np.linalg.norm(X[:,0]-X[:,1])
+#axisy = np.linalg.norm(X[:,0]-X[:,2])
