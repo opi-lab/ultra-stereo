@@ -97,6 +97,14 @@ def labeled(im,c):
       return im, org, x, y
 
 
+def draw(img, corners, imgpts):
+    corner = tuple(np.int32(corners[0].ravel()))
+    img = cv2.line(img,corner,tuple(np.int32(imgpts[0].ravel())), (255,0,0),5)
+    img = cv2.line(img,corner,tuple(np.int32(imgpts[1].ravel())), (0,255,0),5)
+    img = cv2.line(img,corner,tuple(np.int32(imgpts[2].ravel())), (0,0,255),5)
+    return img
+
+
 cv2.namedWindow('Detection', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Detection', 640*2, 512)
 
@@ -111,6 +119,9 @@ t = Params['t']
 
 P1 = K1 @ np.hstack([np.eye(3),np.zeros([3,1])])
 P2 = K2 @ np.hstack([R,t])
+
+Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0]])
+axis = 40*np.array([[1.,0,0], [0,1.,0], [0,0,-1.]])
 
 pts3D = []
 for im1, im2 in zip(I1,I2):
@@ -130,7 +141,11 @@ for im1, im2 in zip(I1,I2):
       X = X[:3]/X[-1]
       pts3D.append(X.T.flatten().tolist())
       
-      cv2.imshow('Detection',np.hstack([im1,im2]))
+      ok, rvec, tvec = cv2.solvePnP(Pm,p1.T,K1,None)
+      ax, _ = cv2.projectPoints(axis, rvec, tvec, K1, None)
+      img = draw(im1.copy(),p1.T,ax)
+      
+      cv2.imshow('Detection',np.hstack([im1,img]))
       if cv2.waitKey(1000) & 0xFF == 27:
             break
 
