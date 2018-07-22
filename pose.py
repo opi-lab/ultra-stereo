@@ -104,6 +104,17 @@ def draw(img, corners, imgpts):
     img = cv2.line(img,corner,tuple(np.int32(imgpts[2].ravel())), (0,0,255),5)
     return img
 
+def drawCub(img, corners, imgpts):
+    imgpts = np.int32(imgpts).reshape(-1,2)
+    # draw ground floor in green
+    img = cv2.drawContours(img, [imgpts[:4]],-1,(0,255,0),-3)
+    # draw pillars in blue color
+    for i,j in zip(range(4),range(4,8)):
+        img = cv2.line(img, tuple(imgpts[i]), tuple(imgpts[j]),(255),3)
+    # draw top layer in red color
+    img = cv2.drawContours(img, [imgpts[4:]],-1,(0,0,255),3)
+    return img
+
 
 cv2.namedWindow('Detection', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('Detection', 640*2, 512)
@@ -120,8 +131,13 @@ t = Params['t']
 P1 = K1 @ np.hstack([np.eye(3),np.zeros([3,1])])
 P2 = K2 @ np.hstack([R,t])
 
-Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0]])
-axis = 40*np.array([[1.,0,0], [0,1.,0], [0,0,-1.]])
+#Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0]])
+Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0],[52.917,84.667,0],
+               [52.917/2,0,0],[52.917/2,84.667,0]])
+#axis = 40*np.array([[1.,0,0], [0,1.,0], [0,0,-1.]])
+
+axis = 20*np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0],
+                   [0,0,-3],[0,3,-3],[3,3,-3],[3,0,-3]])
 
 pts3D = []
 for im1, im2 in zip(I1,I2):
@@ -141,15 +157,25 @@ for im1, im2 in zip(I1,I2):
       X = X[:3]/X[-1]
       pts3D.append(X.T.flatten().tolist())
       
-      ok, rvec, tvec = cv2.solvePnP(Pm,p1.T,K1,None)
+      xaxis = X[:,0]-X[:,1]
+      yaxis = X[:,0]-X[:,2]
+      zaxis = np.cross(xaxis,yaxis)
+      p4th = org1 + (x1-org1) + (y1-org1)
+      p5th = org1 + (x1-org1)/2
+      p6th = org1 + (x1-org1)/2 + (y1-org1)
+      p1 = np.array([org1,x1,y1,p4th,p5th,p6th]).T
+      
+      ok, rvec, tvec = cv2.solvePnP(Pm, p1.T, K1, None)
       ax, _ = cv2.projectPoints(axis, rvec, tvec, K1, None)
-      img = draw(im1.copy(),p1.T,ax)
+      
+#      img = draw(im1.copy(),p1.T,ax)
+      img = drawCub(im1.copy(),p1.T,ax)
       
       cv2.imshow('Detection',np.hstack([im1,img]))
-      if cv2.waitKey(1000) & 0xFF == 27:
+      if cv2.waitKey(2000) & 0xFF == 27:
             break
 
-cv2.destroyAllWindows()
+#cv2.destroyAllWindows()
 pts3D = np.array(pts3D).T
 sio.savemat('pts3D.mat',{'X':pts3D})
 #axisx = np.linalg.norm(X[:,0]-X[:,1])

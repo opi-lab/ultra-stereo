@@ -120,8 +120,8 @@ P2 = K2 @ np.hstack([R,t])
 
 
 pts3D = []
-im1 = cv2.imread('Target/Camera1/target20.bmp')
-im2 = cv2.imread('Target/Camera2/target20.bmp')
+im1 = cv2.imread('Target/Camera1/target04.bmp')
+im2 = cv2.imread('Target/Camera2/target04.bmp')
 
 im1, c1 = detection(im1,3)
 im2, c2 = detection(im2,3)
