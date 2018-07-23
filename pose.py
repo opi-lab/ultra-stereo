@@ -157,15 +157,16 @@ for im1, im2 in zip(I1,I2):
       X = X[:3]/X[-1]
       pts3D.append(X.T.flatten().tolist())
       
-      xaxis = X[:,0]-X[:,1]
-      yaxis = X[:,0]-X[:,2]
+      xaxis = X[:,1]-X[:,0]
+      yaxis = X[:,2]-X[:,0]
       zaxis = np.cross(xaxis,yaxis)
       p4th = org1 + (x1-org1) + (y1-org1)
       p5th = org1 + (x1-org1)/2
       p6th = org1 + (x1-org1)/2 + (y1-org1)
       p1 = np.array([org1,x1,y1,p4th,p5th,p6th]).T
       
-      ok, rvec, tvec = cv2.solvePnP(Pm, p1.T, K1, None)
+#      ok, rvec, tvec = cv2.solvePnP(Pm, p1.T, K1, None)
+      ok, rvec, tvec = cv2.solvePnP(Pm,p1.T,K1,None,np.array([[10],[-0.1],[-0.1]]),X[:,0].reshape(3,-1),1)
       ax, _ = cv2.projectPoints(axis, rvec, tvec, K1, None)
       
 #      img = draw(im1.copy(),p1.T,ax)
