@@ -3,6 +3,7 @@ clear, clc
 load('stereoParams.mat')
 
 K1 = stereoParams.CameraParameters1.IntrinsicMatrix';
+k1 = stereoParams.CameraParameters1.RadialDistortion;
 K2 = stereoParams.CameraParameters2.IntrinsicMatrix';
 
 R = stereoParams.RotationOfCamera2';
