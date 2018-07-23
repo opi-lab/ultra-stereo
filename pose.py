@@ -131,13 +131,11 @@ t = Params['t']
 P1 = K1 @ np.hstack([np.eye(3),np.zeros([3,1])])
 P2 = K2 @ np.hstack([R,t])
 
-#Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0]])
-Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0],[52.917,84.667,0],
-               [52.917/2,0,0],[52.917/2,84.667,0]])
-#axis = 40*np.array([[1.,0,0], [0,1.,0], [0,0,-1.]])
+Pm = np.array([[0,0,0],[52.917,0,0],[0,84.667,0]])
 
+#axis = 40*np.array([[1.,0,0], [0,1.,0], [0,0,1.]])
 axis = 20*np.float32([[0,0,0], [0,3,0], [3,3,0], [3,0,0],
-                   [0,0,-3],[0,3,-3],[3,3,-3],[3,0,-3]])
+                   [0,0,3],[0,3,3],[3,3,3],[3,0,3]])
 
 pts3D = []
 for im1, im2 in zip(I1,I2):
@@ -158,15 +156,15 @@ for im1, im2 in zip(I1,I2):
       pts3D.append(X.T.flatten().tolist())
       
       xaxis = X[:,1]-X[:,0]
+      xaxis = xaxis/np.linalg.norm(xaxis)
       yaxis = X[:,2]-X[:,0]
-      zaxis = np.cross(xaxis,yaxis)
-      p4th = org1 + (x1-org1) + (y1-org1)
-      p5th = org1 + (x1-org1)/2
-      p6th = org1 + (x1-org1)/2 + (y1-org1)
-      p1 = np.array([org1,x1,y1,p4th,p5th,p6th]).T
+      yaxis = yaxis/np.linalg.norm(yaxis)
+      zaxis = np.cross(xaxis, yaxis)
       
-#      ok, rvec, tvec = cv2.solvePnP(Pm, p1.T, K1, None)
-      ok, rvec, tvec = cv2.solvePnP(Pm,p1.T,K1,None,np.array([[10],[-0.1],[-0.1]]),X[:,0].reshape(3,-1),1)
+      R0 = np.array([xaxis,yaxis,zaxis]).T
+      rvec0, _ = cv2.Rodrigues(R0)
+      tvec0 = X[:,0].reshape(3,-1)
+      ok, rvec, tvec = cv2.solvePnP(Pm, p1.T, K1, None, rvec0, tvec0, 1)
       ax, _ = cv2.projectPoints(axis, rvec, tvec, K1, None)
       
 #      img = draw(im1.copy(),p1.T,ax)
@@ -178,6 +176,23 @@ for im1, im2 in zip(I1,I2):
 
 #cv2.destroyAllWindows()
 pts3D = np.array(pts3D).T
-sio.savemat('pts3D.mat',{'X':pts3D})
+#sio.savemat('pts3D.mat',{'X':pts3D})
+
 #axisx = np.linalg.norm(X[:,0]-X[:,1])
 #axisy = np.linalg.norm(X[:,0]-X[:,2])
+
+
+'''
+xaxis = X[:,1]-X[:,0]
+yaxis = X[:,2]-X[:,0]
+zaxis = np.cross(xaxis,yaxis)
+
+xaxis = xaxis/np.linalg.norm(xaxis)
+yaxis = yaxis/np.linalg.norm(yaxis)
+zaxis = zaxis/np.linalg.norm(zaxis)
+
+RR = np.array([xaxis,yaxis,zaxis]).T
+pep = K1 @ np.hstack([RR,tvec])
+
+fi = pep @ np.vstack([Pm.T,np.ones([1,6])])
+fi[:2]/fi[-1]'''
