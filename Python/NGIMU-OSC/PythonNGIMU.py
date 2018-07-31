@@ -21,7 +21,7 @@ def process_arguments(argv):
 		help="Port to receive messages from NGIMU to this computer")
 	parser.add_argument(
 		"--udp_ip_address",
-		default='192.168.1.2',
+		default='192.168.1.3',
 		help="UDP IP Address")
 
 	return parser.parse_args(argv[1:])
@@ -31,10 +31,10 @@ def process_arguments(argv):
 def get_address():
     try:
         address = socket.gethostbyname(socket.gethostname())
-        # On my system, this always gives me 172.16.5.59. Hence...
+        # On my system, this always gives me 169.254.168.46. Hence...
     except:
         address = ''
-    if not address or address.startswith('172.'):
+    if not address or address.startswith('169.'):
         # ...the hard way.
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('4.2.2.1', 0))
