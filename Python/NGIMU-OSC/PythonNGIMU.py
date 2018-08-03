@@ -44,12 +44,11 @@ def main(argv):
     args = process_arguments(argv)
     
     sock_r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock_r.connect(('127.0.0.1', 777))
-    
     sock_p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock_p.connect(('127.0.0.1', 778))
-    
     sock_y = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    sock_r.connect(('127.0.0.1', 777))
+    sock_p.connect(('127.0.0.1', 778))
     sock_y.connect(('127.0.0.1', 779))
     
     # Set the NGIMU to send to this machine's IP address
