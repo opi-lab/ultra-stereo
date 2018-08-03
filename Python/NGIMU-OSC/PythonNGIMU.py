@@ -21,7 +21,7 @@ def process_arguments(argv):
 		help="Port to receive messages from NGIMU to this computer")
 	parser.add_argument(
 		"--udp_ip_address",
-		default='192.168.1.3',
+		default='192.168.1.2',
 		help="UDP IP Address")
 
 	return parser.parse_args(argv[1:])
